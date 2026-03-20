@@ -77,7 +77,7 @@ graph TD
         B -->|Configura| E{Smart Contract}
         D -->|Envía Wallet| E
         E -->|Registra| F[Certificado NFT]
-    end
+    end```
 
 
 ### Justificación de la Tecnología (Análisis de Capas)
