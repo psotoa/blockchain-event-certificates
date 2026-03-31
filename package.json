@@ -1,0 +1,28 @@
+{
+  "name": "blockchain-event-certificates",
+  "version": "1.0.0",
+  "description": "Minimal blockchain architecture project for event attendance certificates using POAP.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/psotoa/blockchain-event-certificates.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/psotoa/blockchain-event-certificates/issues"
+  },
+  "homepage": "https://github.com/psotoa/blockchain-event-certificates#readme",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^7.0.0",
+    "@nomicfoundation/hardhat-toolbox-mocha-ethers": "^3.0.3",
+    "@types/node": "^22.19.15",
+    "hardhat": "^3.2.0",
+    "typescript": "~5.8.0"
+  }
+}
