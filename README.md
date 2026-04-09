@@ -1,75 +1,161 @@
-# Sistema de Certificados de Asistencia 
-El presente proyecto, es basado en la asistencia a eventos en el concepto de POAP, implementado con Smart Contracts propios en Solidity.
+# blockchain-event-certificates
 
-## 1. Descripción del sistema
-Este proyecto propone una solución para registrar la asistencia a eventos académicos, charlas o webinars mediante el uso de Smart Contracts propios. El objetivo es que un organizador pueda emitir un comprobante digital inmutable de participación sin depender de infraestructuras externas.
+Sistema de certificados de asistencia en blockchain inspirado en POAP, implementado con smart contracts propios en Solidity, una Dapp web con MetaMask y despliegue en Polygon Amoy.
 
-El sistema no utiliza la infraestructura directa de POAP, sino que implementa su propia lógica de registro on-chain.
+## Descripción del sistema
 
-## 2. Arquitectura del Proyecto
-El sistema se organiza en tres capas técnicas fundamentales para garantizar su funcionamiento descentralizado:
+Este proyecto propone una solución para emitir certificados de asistencia verificables en eventos académicos, talleres, webinars o conferencias. En lugar de depender de certificados tradicionales fácilmente falsificables, el sistema permite que cada participante reclame por sí mismo un certificado digital mediante su wallet y un claim code único.
 
-2.1 Capa de Aplicación (Frontend): Base preliminar en HTML/JS (ubicada en la carpeta /web) que servirá para la futura interacción con el usuario y la conexión con billeteras digitales.
+La solución toma inspiración conceptual de POAP, pero implementa un flujo simplificado con smart contracts propios. El organizador crea el evento y carga hashes de códigos únicos, mientras que el participante conecta su wallet con MetaMask y reclama su certificado directamente desde la Dapp.
 
-2.2 Capa de Lógica (Smart Contract): Contrato AttendanceRegistry.sol encargado de gestionar la creación de eventos, el registro de wallets de asistentes y la verificación de registros.
+El objetivo principal del sistema es demostrar cómo blockchain puede utilizarse para crear pruebas de asistencia verificables, trazables y resistentes a manipulación, manteniendo una experiencia de usuario relativamente simple y comprensible dentro del alcance de un MVP académico.
 
-2.3 Capa de Red: Entorno de ejecución basado en Hardhat para pruebas locales y configurado para el despliegue final en la red de pruebas Polygon Amoy.
+## Problema que resuelve
 
-## 3. Flujo de Transacciones
-Fragmento de código
+Los certificados de asistencia tradicionales presentan varios problemas:
+
+- pueden ser falsificados o alterados
+- no existe una forma simple de verificar autenticidad
+- suelen depender por completo de un emisor centralizado
+- el participante normalmente no controla el certificado de forma directa
+- la validación posterior del certificado suele ser manual
+
+Este proyecto propone un mecanismo de reclamo on-chain donde el participante usa su propia wallet para reclamar un certificado único, usando un claim code previamente distribuido por el organizador.
+
+## Solución propuesta
+
+La solución implementa un flujo descentralizado de reclamo de certificados:
+
+1. El organizador despliega el contrato inteligente.
+2. El organizador crea un evento.
+3. El organizador carga hashes de claim codes únicos.
+4. El participante recibe un código por un canal externo (correo, QR o similar).
+5. El participante abre la Dapp y conecta MetaMask.
+6. El participante ingresa el `eventId`, el `claimCode` y un `tokenURI`.
+7. El contrato valida el código y emite el certificado si el reclamo es válido.
+8. La Dapp permite verificar si una wallet ya reclamó o no.
+
+## Arquitectura
+
+La arquitectura mínima del sistema está compuesta por los siguientes elementos:
+
+1. **Organizador del evento**  
+   Responsable de desplegar el contrato, crear eventos y registrar los hashes de claim codes válidos.
+
+2. **Smart contract `AttendanceCertificate`**  
+   Contrato principal del sistema. Gestiona la creación de eventos, la carga de códigos válidos, la validación del reclamo y la emisión del certificado.
+
+3. **Dapp web**  
+   Interfaz de usuario desarrollada para permitir la conexión de MetaMask, el reclamo del certificado y la verificación del estado de una wallet.
+
+4. **MetaMask**  
+   Wallet del participante utilizada para firmar transacciones e interactuar con el contrato.
+
+5. **Polygon Amoy**  
+   Red de testnet donde se despliega el contrato para la entrega final.
+
+## Flujo de transacciones
+
+El flujo funcional del sistema es el siguiente:
+
+1. Se despliega el contrato `AttendanceCertificate` en la red correspondiente.
+2. El organizador crea un evento mediante el contrato.
+3. El organizador carga hashes de claim codes asociados al evento.
+4. El participante abre la Dapp y conecta MetaMask.
+5. La Dapp detecta la red activa y carga la dirección del contrato desde `web/config.json`.
+6. El participante ingresa:
+   - `eventId`
+   - `claimCode`
+   - `tokenURI`
+7. La Dapp llama la función `claimCertificate(...)`.
+8. El contrato verifica:
+   - que el evento exista y esté activo
+   - que el código sea válido
+   - que el código no haya sido usado antes
+   - que la wallet no haya reclamado previamente
+9. Si todas las validaciones pasan, el contrato registra el reclamo y emite el certificado.
+10. El participante puede usar la Dapp para consultar si ya reclamó.
+
+## Diagrama de componentes
+
 ```mermaid
-    sequenceDiagram
-        participant O as Organizador
-        participant C as AttendanceRegistry
-        participant B as Blockchain (Amoy/Local)
-        participant U as Usuario
-    
-        O->>C: Desplegar contrato
-        O->>C: Crear evento (ID y Nombre)
-        O->>C: Registrar dirección de asistente
-        C->>B: Guardar asistencia on-chain
-        U->>C: Consultar estado de asistencia
-        C-->>U: Retornar verdadero/falso
-        O->>C: Cerrar evento (Finalizar registros)
+graph TD
+    A[Organizador del evento] --> B[Smart Contract AttendanceCertificate]
+    C[Participante] --> D[Dapp Web]
+    D --> E[MetaMask]
+    E --> B
+    B --> F[Polygon Amoy]
 ```
-   
-## 4. Desarrollo de Contratos Inteligentes 
-Para esta entrega se desarrolló e implementó el contrato inteligente AttendanceRegistry.sol utilizando Solidity y el entorno Hardhat. Este contrato es la pieza central que permite la autonomía del sistema.
+## Diagrama de flujo de transacciones 
 
-## 5. Funcionalidades principales desarrolladas:
+sequenceDiagram
+    participant O as Organizador
+    participant C as Contrato
+    participant U as Usuario
+    participant D as Dapp
+    participant M as MetaMask
+    participant A as Polygon Amoy
 
-5.1 Creación de eventos: Permite al organizador inicializar eventos únicos.
+    O->>C: Crear evento
+    O->>C: Cargar hash de claim code
+    U->>D: Abrir Dapp
+    U->>M: Conectar wallet
+    D->>C: Cargar dirección del contrato
+    U->>D: Ingresar eventId, claimCode y tokenURI
+    D->>M: Solicitar firma de transacción
+    M->>C: claimCertificate(...)
+    C->>A: Registrar reclamo y emitir certificado
+    D->>C: Consultar hasClaimed(...)
+    C-->>D: Retornar estado del reclamo
 
-5.2 Registro de asistencia: Almacena las direcciones de los participantes de forma inmutable.
+### El contrato principal es AttendanceCertificate.sol.
 
-5.3 Verificación de participación: Cualquier usuario puede consultar si una dirección asistió a un evento específico.
+Sus funciones clave son:
+	•	createEvent(string name)
+	•	addClaimCode(uint256 eventId, bytes32 codeHash)
+	•	addClaimCodes(uint256 eventId, bytes32[] memory codeHashes)
+	•	claimCertificate(uint256 eventId, string memory code, string memory tokenURI_)
+	•	hasClaimed(uint256 eventId, address attendee)
+	•	closeEvent(uint256 eventId)
 
-5.4 Gestión de estado: Capacidad para cerrar eventos y evitar registros posteriores.
+### Dapp
 
-## 6. Evidencia de Ejecución Local
-El contrato ha sido validado satisfactoriamente bajo los siguientes parámetros:
+La interfaz web fue desarrollada para permitir que el usuario interactúe con el contrato usando MetaMask. Las funcionalidades implementadas son:
+	•	conectar wallet
+	•	detectar la red activa
+	•	resolver la dirección del contrato desde web/config.json
+	•	reclamar un certificado con claim code
+	•	verificar si la wallet ya reclamó
 
-Compilación: Exitosa mediante Hardhat (Solidity 0.8.20).
+## Estructura del proyecto 
 
-Pruebas Unitarias: 4 pruebas aprobadas que cubren el flujo principal de registro y consulta.
+	•	contracts/AttendanceCertificate.sol: contrato principal del sistema
+	•	contracts/AttendanceRegistry.sol: contrato previo de la iteración anterior
+	•	test/AttendanceCertificate.test.ts: pruebas unitarias del contrato final
+	•	test/AttendanceRegistry.test.ts: pruebas del contrato anterior
+	•	scripts/deploy.js: despliegue del contrato y actualización de web/config.json
+	•	scripts/setupEvent.js: creación de evento y carga de claim code para pruebas/demostración
+	•	web/index.html: interfaz web de la Dapp
+	•	web/app.js: lógica de frontend
+	•	web/config.json: direcciones del contrato por red
+	•	hardhat.config.ts: configuración de Hardhat para local y Amoy
+	•	metadata/: recursos relacionados con metadatos del certificado
+	•	frontend/: carpeta adicional de frontend mantenida durante el desarrollo
+	•	README.md: documentación general del proyecto
 
-Despliegue Local: Contrato desplegado correctamente en la dirección: 0x5FbDB2315678afecb367f032d93F642f64180aa3
+## Alcance del proyecto
 
-## 7. Manual para Pruebas Locales
-Los siguientes pasos nos permiten en una terminal, verificar el funcionamiento técnico:
+El proyecto actualmente permite:
+	•	desplegar el contrato
+	•	crear eventos
+	•	cargar claim codes
+	•	reclamar certificados con wallet
+	•	verificar reclamos desde la Dapp
+	•	operar tanto en entorno local como en Polygon Amoy
 
-7.1 Instalar dependencias: npm install
+## Limitaciones 
 
-7.2 Compilar el smart contract: npx hardhat compile
-
-7.3 Ejecutar pruebas unitarias: npx hardhat test
-
-7.4 Levantar blockchain local: npx hardhat node
-
-7.5 Desplegar contrato localmente: npx hardhat run scripts/deploy.js --network localhost
-
-## 8. Justificación Técnica
-Se optó por desarrollar un contrato propio simplificado para profundizar en el uso de Solidity y Hardhat. Este modelo captura la esencia de la "Prueba de Asistencia" de forma eficiente,lo cual permite una futura integración de una DApp y el despliegue definitivo en una red compatible con EVM como Polygon Amoy.
-
-## 9. Autoría
-Proyecto desarrollado por Pedro Soto y Sofía Oviedo como parte del curso Blockchain and Distributed Ledgers.
+	•	la preparación del evento todavía se realiza por script del organizador
+	•	no existe una interfaz administrativa completa para crear eventos desde la web
+	•	el sistema está planteado como MVP funcional académico
+	•	la experiencia visual del certificado puede mejorarse en iteraciones futuras
