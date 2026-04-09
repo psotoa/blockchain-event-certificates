@@ -20,30 +20,61 @@ async function main() {
     throw new Error(`No hay contractAddress en config.json para chainId ${chainId}`);
   }
 
+  const inputPath = path.join(process.cwd(), "scripts", "admin", "event-input.json");
+  if (!fs.existsSync(inputPath)) {
+    throw new Error("No existe scripts/admin/event-input.json");
+  }
+
+  const input = JSON.parse(fs.readFileSync(inputPath, "utf8"));
+
+  const eventName = input.eventName?.trim();
+  const claimCodes = Array.isArray(input.claimCodes) ? input.claimCodes : [];
+
+  if (!eventName) {
+    throw new Error("El campo eventName es obligatorio");
+  }
+
+  if (claimCodes.length === 0) {
+    throw new Error("Debe existir al menos un claim code en event-input.json");
+  }
+
+  const sanitizedCodes = claimCodes
+    .map((code) => String(code).trim())
+    .filter((code) => code.length > 0);
+
+  if (sanitizedCodes.length === 0) {
+    throw new Error("Todos los claim codes están vacíos");
+  }
+
+  const codeHashes = sanitizedCodes.map((code) =>
+    ethers.keccak256(ethers.toUtf8Bytes(code))
+  );
+
   const contract = await ethers.getContractAt(
     "AttendanceCertificate",
     deployment.contractAddress
   );
-
-  const eventName = "Charla Blockchain";
-  const claimCode = "CODIGO-123";
-  const codeHash = ethers.keccak256(ethers.toUtf8Bytes(claimCode));
 
   console.log("Usando contrato:", deployment.contractAddress);
   console.log("Chain ID:", chainId);
   console.log("Creando evento:", eventName);
 
   const tx1 = await contract.createEvent(eventName);
-  await tx1.wait();
+  const receipt1 = await tx1.wait();
 
-  console.log("Evento creado con ID 0");
+  const eventId = 0;
+  console.log(`Evento creado con ID ${eventId}`);
+  console.log("Tx createEvent:", receipt1.hash);
 
-  const tx2 = await contract.addClaimCode(0, codeHash);
-  await tx2.wait();
+  const tx2 = await contract.addClaimCodes(eventId, codeHashes);
+  const receipt2 = await tx2.wait();
 
-  console.log("Claim code cargado correctamente");
-  console.log("Claim code de prueba:", claimCode);
-  console.log("Code hash:", codeHash);
+  console.log("Claim codes cargados correctamente");
+  console.log("Tx addClaimCodes:", receipt2.hash);
+  console.log("Claim codes disponibles:");
+  sanitizedCodes.forEach((code, index) => {
+    console.log(`- [${index + 1}] ${code}`);
+  });
 }
 
 main().catch((error) => {
