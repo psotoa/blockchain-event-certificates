@@ -3,29 +3,116 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Registro de Asistencia en Blockchain</title>
+  <title>Reclamo de Certificado de Asistencia</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 20px;
+      line-height: 1.6;
+      color: #111;
+    }
+
+    h1, h2 {
+      margin-bottom: 0.5rem;
+    }
+
+    .container {
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      padding: 24px;
+    }
+
+    .section {
+      margin-top: 24px;
+    }
+
+    input {
+      display: block;
+      width: 100%;
+      max-width: 500px;
+      padding: 10px;
+      margin: 8px 0 12px 0;
+      font-size: 14px;
+    }
+
+    button {
+      display: inline-block;
+      margin: 6px 8px 6px 0;
+      padding: 12px 18px;
+      background: #111;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      opacity: 0.92;
+    }
+
+    .status-box {
+      margin-top: 20px;
+      padding: 12px;
+      background: #f5f5f5;
+      border-left: 4px solid #111;
+    }
+
+    #result {
+      word-break: break-word;
+    }
+
+    .note {
+      margin-top: 20px;
+      font-size: 14px;
+      color: #444;
+    }
+  </style>
 </head>
 <body>
-  <h1>Registro de Asistencia a Eventos</h1>
+  <div class="container">
+    <h1>Certificado de Asistencia en Blockchain</h1>
+    <p>
+      Esta Dapp permite que un participante reclame por sí mismo un certificado
+      de asistencia mediante MetaMask, usando un <em>claim code</em> único.
+    </p>
 
-  <button id="connectButton">Conectar MetaMask</button>
+    <div class="section">
+      <h2>1. Conectar wallet</h2>
+      <button id="connectButton">Conectar MetaMask</button>
+    </div>
 
-  <h2>Crear evento</h2>
-  <input id="eventName" type="text" placeholder="Nombre del evento" />
-  <button id="createButton">Crear evento</button>
+    <div class="section">
+      <h2>2. Reclamar certificado</h2>
 
-  <h2>Gestionar asistencia</h2>
-  <input id="eventId" type="number" placeholder="ID del evento" />
-  <input id="attendeeAddress" type="text" placeholder="Dirección del asistente (opcional)" />
+      <label for="eventId">ID del evento</label>
+      <input id="eventId" type="number" placeholder="Ejemplo: 0" />
 
-  <div>
-    <button id="registerButton">Registrar asistencia</button>
-    <button id="verifyButton">Verificar asistencia</button>
-    <button id="closeButton">Cerrar evento</button>
+      <label for="claimCode">Claim code</label>
+      <input id="claimCode" type="text" placeholder="Ingrese su código único" />
+
+      <label for="tokenURI">Token URI</label>
+      <input
+        id="tokenURI"
+        type="text"
+        placeholder="Ejemplo: ipfs://Qm... o https://..."
+      />
+
+      <button id="claimButton">Reclamar certificado</button>
+      <button id="verifyButton">Verificar si ya reclamé</button>
+    </div>
+
+    <div class="status-box">
+      <p><strong>Estado:</strong> <span id="status">Desconectado</span></p>
+      <p><strong>Resultado:</strong> <span id="result"></span></p>
+    </div>
+
+    <div class="note">
+      Para que el reclamo funcione, el organizador debe haber creado el evento y
+      cargado previamente el hash del claim code en el contrato.
+    </div>
   </div>
-
-  <p id="status">Desconectado</p>
-  <p id="result"></p>
 
   <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.4/dist/ethers.umd.min.js"></script>
   <script src="./app.js"></script>
