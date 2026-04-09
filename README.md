@@ -113,6 +113,7 @@ sequenceDiagram
 ### El contrato principal es AttendanceCertificate.sol.
 
 Sus funciones clave son:
+
 	•	createEvent(string name)
 	•	addClaimCode(uint256 eventId, bytes32 codeHash)
 	•	addClaimCodes(uint256 eventId, bytes32[] memory codeHashes)
