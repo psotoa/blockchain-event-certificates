@@ -62,7 +62,25 @@ async function main() {
   const tx1 = await contract.createEvent(eventName);
   const receipt1 = await tx1.wait();
 
-  const eventId = 0;
+  let eventId = null;
+
+  if (receipt1?.logs?.length) {
+    for (const log of receipt1.logs) {
+      try {
+        const parsed = contract.interface.parseLog(log);
+        if (parsed && parsed.name === "EventCreated") {
+          eventId = Number(parsed.args.eventId);
+          break;
+        }
+      } catch (_) {
+      }
+    }
+  }
+
+  if (eventId === null) {
+    throw new Error("No se pudo obtener el eventId desde los logs de createEvent");
+  }
+
   console.log(`Evento creado con ID ${eventId}`);
   console.log("Tx createEvent:", receipt1.hash);
 
@@ -75,6 +93,8 @@ async function main() {
   sanitizedCodes.forEach((code, index) => {
     console.log(`- [${index + 1}] ${code}`);
   });
+
+  console.log(`\nUse este eventId en la Dapp: ${eventId}`);
 }
 
 main().catch((error) => {
