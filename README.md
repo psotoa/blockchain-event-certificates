@@ -87,7 +87,7 @@ graph TD
     B --> F[Polygon Amoy]
 ```
 ## Diagrama de flujo de transacciones 
-
+```mermaid 
 sequenceDiagram
 
     participant O as Organizador
@@ -108,6 +108,7 @@ sequenceDiagram
     C->>A: Registrar reclamo y emitir certificado
     D->>C: Consultar hasClaimed(...)
     C-->>D: Retornar estado del reclamo
+```
 
 ### El contrato principal es AttendanceCertificate.sol.
 
