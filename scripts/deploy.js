@@ -11,14 +11,14 @@ async function main() {
   const contractAddress = await contract.getAddress();
   console.log("Contrato desplegado en:", contractAddress);
 
-  const chainIdMap = {
-    localhost8546: 31337,
-    amoy: 80002
-  };
+  const network = await ethers.provider.getNetwork();
+  const chainId = Number(network.chainId);
 
-  const chainId = chainIdMap[hre.network.name];
-  if (!chainId) {
-    throw new Error(`No hay chainId configurado para la red ${hre.network.name}`);
+  let networkName = "desconocida";
+  if (chainId === 31337) {
+    networkName = "localhost8546";
+  } else if (chainId === 80002) {
+    networkName = "amoy";
   }
 
   const configPath = path.join(process.cwd(), "web", "config.json");
@@ -29,7 +29,7 @@ async function main() {
   }
 
   config[String(chainId)] = {
-    networkName: hre.network.name,
+    networkName,
     contractAddress
   };
 
