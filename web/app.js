@@ -45,7 +45,7 @@ async function conectar() {
 
     const deployment = deployments[String(chainId)];
     if (!deployment) {
-      throw new Error(`No hay contrato configurado para chainId ${chainId}`);
+        throw new Error(`No hay contrato configurado para chainId ${chainId}`);
     }
 
     contract = new ethers.Contract(deployment.contractAddress, ABI, signer);
@@ -59,8 +59,17 @@ async function conectar() {
     console.log("Red detectada:", deployment.networkName);
     console.log("Contrato:", deployment.contractAddress);
   } catch (error) {
-    console.error(error);
-    alert("No se pudo conectar MetaMask o no existe configuración para esta red");
+  console.error(error);
+
+  const message =
+    error?.shortMessage ||
+    error?.reason ||
+    error?.message ||
+    "No se pudo conectar MetaMask";
+
+  setStatus("Error de conexión");
+  setResult(message);
+  alert(message);
   }
 }
 
@@ -97,8 +106,17 @@ async function reclamarCertificado() {
     setStatus("Certificado reclamado correctamente");
     setResult(`Transacción confirmada: ${receipt.hash}`);
   } catch (error) {
-    console.error(error);
-    alert("No se pudo reclamar el certificado");
+  console.error(error);
+
+  const message =
+    error?.shortMessage ||
+    error?.reason ||
+    error?.message ||
+    "No se pudo reclamar el certificado";
+
+  setStatus("Error en el reclamo");
+  setResult(message);
+  alert(message);
   }
 }
 
@@ -126,8 +144,17 @@ async function verificarReclamo() {
         : `La wallet ${address} NO ha reclamado el certificado del evento ${eventId}`
     );
   } catch (error) {
-    console.error(error);
-    alert("No se pudo verificar el reclamo");
+  console.error(error);
+
+  const message =
+    error?.shortMessage ||
+    error?.reason ||
+    error?.message ||
+    "No se pudo verificar el reclamo";
+
+  setStatus("Error al verificar");
+  setResult(message);
+  alert(message);
   }
 }
 
